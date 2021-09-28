@@ -3,15 +3,14 @@ import axios from "axios";
 import {
   Box,
   Button,
-  ButtonGroup,
   Container,
   createTheme,
   CssBaseline,
-  Grid,
   MuiThemeProvider,
-  Paper,
   TextField,
   TextareaAutosize,
+  Checkbox,
+  FormControlLabel,
 } from "@material-ui/core";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -47,6 +46,8 @@ export default function AddNewProduct() {
 
   const [selectType, setSelectType] = useState();
   const [type, setType] = useState("false");
+
+  const [unicProd, setunicProd] = useState("");
   useEffect(() => {
     axios.get(`${env.URL}/api/getallprodtype`).then((result) => {
       if (result.data.success) {
@@ -88,7 +89,13 @@ export default function AddNewProduct() {
       alert("აირჩიეთ პროდუქტის ტიპი");
     } else {
       axios
-        .post(`${env.URL}/products/add`, { type, data, dataRU, dataGE })
+        .post(`${env.URL}/products/add`, {
+          type,
+          data,
+          dataRU,
+          dataGE,
+          unicProduct: unicProd,
+        })
         .then((response) => {
           if (response.data.success) {
             alert("პროდუქტი წარმატებით დაემატა");
@@ -98,9 +105,17 @@ export default function AddNewProduct() {
         });
     }
   };
+  const [checked, setChecked] = React.useState(true);
+
+  const handleChange = (event) => {
+    if (event.target.checked) {
+      setunicProd("");
+    }
+    setChecked(event.target.checked);
+  };
   return (
     <>
-      {console.log(type)}
+      {console.log(checked, unicProd)}
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         <Container maxWidth="md">
@@ -115,7 +130,14 @@ export default function AddNewProduct() {
               <Link to="/" style={{ fontSize: 30, textAlign: "center" }}>
                 <i class="far fa-arrow-circle-left"></i>
               </Link>
-              <div style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 {selectType && (
                   <>
                     <select
@@ -266,6 +288,21 @@ export default function AddNewProduct() {
                 flexDirection: "column",
               }}
             >
+              <FormControlLabel
+                label="გამორჩეული პროდუქტი"
+                control={<Checkbox checked={checked} onChange={handleChange} />}
+              />
+              {checked && (
+                <>
+                  <TextField
+                    placeholder="პროდუქტის კოდი"
+                    value={unicProd}
+                    onChange={(e) => {
+                      setunicProd(e.target.value);
+                    }}
+                  ></TextField>
+                </>
+              )}
               <Button
                 variant="contained"
                 type="submit"
